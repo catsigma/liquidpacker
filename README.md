@@ -1,2 +1,2 @@
 # liqpack
-Package managenet for liquidity of Tezos
+Package manager for liquidity of Tezos
