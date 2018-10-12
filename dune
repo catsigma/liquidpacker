@@ -1,2 +1,5 @@
+(copy_files# src/*.{ml,mli})
+
 (executable
-  (name liqpack))
+  (name liqpack)
+  (libraries sexplib))
