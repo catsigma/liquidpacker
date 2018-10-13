@@ -2,4 +2,4 @@
 
 (executable
   (name liqpack)
-  (libraries sexplib))
+  (libraries str sexplib))
