@@ -5,5 +5,4 @@ synopsis: "Package manager for liquidity of Tezos"
 maintainer: "catsigma <im@catsigma.com>"
 authors: "catsigma <im@catsigma.com>"
 license: "MIT"
-depends: [ "ocaml" "ocamlfind" "dune" ]
 build: ["dune" "build" "liqpack.exe"]

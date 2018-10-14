@@ -5,7 +5,7 @@ exception Error of string
 
 type config = {
   path: string;
-  libs: (string, string) Hashtbl.t;  
+  libs: (string, string * string) Hashtbl.t;  
 }
 
 let construct_config path libs = 
@@ -22,8 +22,8 @@ let parse_config config_raw =
     match sexp with
     | Sexp.List (Sexp.Atom "path" :: Sexp.Atom value :: []) ->
       { result with path = value }
-    | Sexp.List (Sexp.Atom key :: Sexp.Atom value :: []) ->
-      Hashtbl.add result.libs key value;
+    | Sexp.List (Sexp.Atom name :: Sexp.Atom meth :: Sexp.Atom location :: []) ->
+      Hashtbl.add result.libs name (meth, location);
       result
     | Sexp.List sexp_lst ->
       List.fold_left (fun acc x -> loop x acc) result sexp_lst
@@ -34,7 +34,9 @@ let parse_config config_raw =
 
 let gen_config config =
   construct_config config.path 
-    (Hashtbl.fold (fun k v acc -> Sexp.List [Sexp.Atom k; Sexp.Atom v] :: acc) config.libs [])
+    (Hashtbl.fold 
+      (fun k (m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom m; Sexp.Atom u] :: acc) 
+      config.libs [])
 
 let write_config sexp =
   Sexp.save_hum "liqpack.cfg" sexp
@@ -51,16 +53,9 @@ let git_clone name url =
 
 let sys_arg_parse config =
   match Sys.argv with
-  | [| _ ; "install" ; url |] -> 
-    if Str.search_forward (Str.regexp "\\([a-zA-Z0-9_\\-]+\\)\\.git") url 0 > 0 then
-      let name = Str.matched_group 1 url in
-      if git_clone name url <> 0 then
-        raise (Error "git clone failed")
-      else
-        Hashtbl.add config.libs name url;
-        gen_config config |> write_config
-    else
-      raise (Error "invalid git url: %s" #< url)
+  | [| _ ; "install" ; name; meth; url |] -> 
+    let _ = Hashtbl.replace config.libs name (meth, url) in
+    gen_config config |> write_config
 
   | [| _ ; "setpath" ; arg |] -> gen_config {config with path = arg} |> write_config
   | [| _ ; command ; arg |] -> print_endline ("good command" ^ command ^ arg)
@@ -69,7 +64,7 @@ let sys_arg_parse config =
   Current path: %s
 
   setpath <liquidity path>
-  install <package git url>
+  install <name> <method> <location>
   remove <package name>
   list
   " #< config.path

@@ -1,7 +1,3 @@
-lib: [
-  "_build/install/default/lib/liqpack/META" {"META"}
-  "_build/install/default/lib/liqpack/opam" {"opam"}
-]
-doc: [
-  "_build/install/default/doc/liqpack/README.md"
+bin: [
+  "_build/install/default/liqpack.exe" {"liqpack"}
 ]
