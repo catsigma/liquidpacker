@@ -38,15 +38,32 @@ let gen_config config =
       (fun k (m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom m; Sexp.Atom u] :: acc) 
       config.libs [])
 
+
+let config_path = 
+  let dir = Unix.getenv "HOME" ^ "/.liqpack" in
+  let result = 
+    try
+      Sys.is_directory dir
+    with Sys_error _ ->
+      false
+  in
+  let _ = 
+    if result then
+      ()
+    else
+      Unix.mkdir dir 0o777
+  in
+  dir ^ "/config"
+
 let write_config sexp =
-  Sexp.save_hum "liqpack.cfg" sexp
+  Sexp.save_hum config_path sexp
 
 let read_config () =
   try
-    Sexp.load_sexp "liqpack.cfg"
+    Sexp.load_sexp config_path
   with Sys_error _ ->
     write_config init_config;
-    Sexp.load_sexp "liqpack.cfg"
+    Sexp.load_sexp config_path
 
 let git_clone name url =
   Sys.command ("git clone " ^ url ^ " libs/" ^ name)
