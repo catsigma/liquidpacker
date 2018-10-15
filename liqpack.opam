@@ -6,4 +6,4 @@ maintainer: "catsigma <im@catsigma.com>"
 authors: "catsigma <im@catsigma.com>"
 license: "MIT"
 depends: [ "ocaml" "ocamlfind" "dune" ]
-build: ["dune" "build" "liqpack.exe"]
+build: ["dune" "build" "--profile" "release" "src/liqpack.exe"]

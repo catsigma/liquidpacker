@@ -1,0 +1,4 @@
+(executable
+  (name liqpack)
+  (libraries str sexplib))
+
