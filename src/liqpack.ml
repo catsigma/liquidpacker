@@ -38,21 +38,23 @@ let gen_config config =
       (fun k (m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom m; Sexp.Atom u] :: acc) 
       config.libs [])
 
-
-let config_path = 
-  let dir = Unix.getenv "HOME" ^ "/.liqpack" in
+let check_n_create dir =
   let result = 
     try
       Sys.is_directory dir
     with Sys_error _ ->
       false
   in
-  let _ = 
-    if result then
-      ()
-    else
-      Unix.mkdir dir 0o777
-  in
+  if not result then
+    Unix.mkdir dir 0o777
+  else
+    ()
+
+let config_path = 
+  let dir = Unix.getenv "HOME" ^ "/.liqpack" in
+  let libs_dir = Unix.getenv "HOME" ^ "/.liqpack/libs" in
+  check_n_create dir;
+  check_n_create libs_dir;
   dir ^ "/config"
 
 let write_config sexp =

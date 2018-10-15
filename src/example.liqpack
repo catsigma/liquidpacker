@@ -1,0 +1,6 @@
+(
+  (name example)
+  (files x.liq y.liq z.liq)
+  (main-contract example)
+  (deps-pack (token))
+)
