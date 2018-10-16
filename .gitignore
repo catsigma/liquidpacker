@@ -2,3 +2,4 @@
 .merlin
 liqpack.cfg
 /libs
+*.tz
