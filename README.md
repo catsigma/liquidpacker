@@ -8,8 +8,9 @@ opam install liqpack
 
 ### Install package from local
 ```
-liqpack install examples/bar
+liqpack install examples/foo
 ```
+This will also install all the dependencies defined in the `liqpack` file in the package's root folder.
 
 ### Install package from git
 ```

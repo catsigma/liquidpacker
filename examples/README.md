@@ -9,6 +9,6 @@ This will install both `foo` and his dependents.
 
 ### token
 ```
-liqpack install token/
-liqpack build token/
+liqpack install use_of_token/
+liqpack build use_of_token/
 ```
