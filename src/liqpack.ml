@@ -9,7 +9,7 @@ let sys_arg_parse (config : config) =
       print_endline "Please run `liqpack setpath <location of liquidity executable file>`"
     else
       match argv with
-      | [| _ ; "check" |] ->
+      | [| _ ; "list" |] ->
         let path = config.path in
         let libs = Hashtbl.fold 
           (fun k (m, _) acc -> "%s\n    %s (%s)" #< acc k m) 
@@ -31,18 +31,35 @@ let sys_arg_parse (config : config) =
       | [| _ ; "build" ; dir_path; arg |] ->
         Compile.compile dir_path ~arg config 
 
-      | [| _ ; "install" ; name; path |] ->
-        (* TODO: remove name *)
-        if is_git_url path then
-          let _ = Hashtbl.replace config.libs name ("git", path) in
-          if BaseConfig.install_from_git name path = 0 then
-            BaseConfig.gen_config config |> BaseConfig.write_config
+      | [| _ ; "install" ; raw_path |] ->
+        let rec install path =
+          let liqpack_config, from =
+            if is_git_url path then
+              let (temp_dir, result) = BaseConfig.install_from_git path in
+              if result then
+                Compile.get_liqpack_config temp_dir config false, "git"
+              else
+                let _ = Sys.command ("rm -rf %s" #< temp_dir) in
+                raise (Error "git clone failed")
+            else
+              let path = if path = raw_path then path else raw_path ^ "/" ^ path in
+              Compile.get_liqpack_config path config false, "local"
+          in
+          if liqpack_config.name = "" then
+            raise (Error "no name field in liqpack file")
           else
-            raise (Error "git clone failed")
-        else
-          let abs_dir = abs_path path in
-          let _ = Hashtbl.replace config.libs name ("local", abs_dir) in
-          BaseConfig.gen_config config |> BaseConfig.write_config
+            let _ = 
+              if from = "git" then
+                let _ = BaseConfig.move_for_git liqpack_config.name in
+                Hashtbl.replace config.libs liqpack_config.name ("git", path)
+              else
+                let path = if path = raw_path then path else raw_path ^ "/" ^ path in
+                Hashtbl.replace config.libs liqpack_config.name ("local", abs_path path)
+            in
+            List.iter (fun (_,x) -> install x) liqpack_config.deps
+        in
+        install raw_path;
+        BaseConfig.gen_config config |> BaseConfig.write_config
 
       | _ -> print_endline "
   Liquidity path: %s
@@ -51,7 +68,7 @@ let sys_arg_parse (config : config) =
   build <target dir path> <?liquidity arguments>      
   install <name> <dir path/git url>
   remove <package name>
-  check
+  list
       " #< config.path
 
 let () =

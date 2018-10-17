@@ -1,5 +1,6 @@
 (
+  (name bar)
   (files x.liq y.liq)
   (main Q)
-  (deps foo)
+  (deps )
 )

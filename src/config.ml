@@ -8,9 +8,10 @@ type config = {
 
 module LiqpackConfig = struct
   type t = {
+    name: string;
     files: string list;
     main: string option;
-    deps: string list;
+    deps: (string * string) list;
   }
 
   let read_liqpack path =
@@ -32,9 +33,12 @@ module LiqpackConfig = struct
     | _ ->
       raise (Error "package %s is not found" #< name)
 
-  let rec parse_liqpack liqpack_raw (config : config) =
+  let rec parse_liqpack liqpack_raw (config : config) need_files =
     let rec loop sexp result =
       match sexp with
+      | Sexp.List (Sexp.Atom "name" :: Sexp.Atom name :: []) ->
+        { result with name }
+
       | Sexp.List (Sexp.Atom "main" :: []) ->
         result
 
@@ -51,18 +55,24 @@ module LiqpackConfig = struct
         { result with files = result.files @ path_strings }
 
       | Sexp.List (Sexp.Atom "deps" :: deps) ->
-        let pack_names = List.map (fun x -> 
+        let deps = List.map (fun x -> 
             match x with 
-            | Sexp.List _ -> raise (Error "invalid `deps` value in liqpack file")
-            | Sexp.Atom x -> x
+            | Sexp.List (Sexp.Atom name :: Sexp.Atom info :: []) ->
+              name, info
+            | _ -> raise (Error "invalid `deps` value in liqpack file")
           ) deps
         in
-        let deps_files = List.fold_left 
-          (fun acc x -> 
-            let dir, sexp = read_package config x in
-            let combined = List.map (fun x -> dir ^ x) (parse_liqpack sexp config).files in
-            acc @ combined) [] pack_names in
-        { result with files = deps_files @ result.files }
+        let deps_files = 
+          if need_files then
+            List.fold_left 
+              (fun acc (x, _) -> 
+                let dir, sexp = read_package config x in
+                let combined = List.map (fun x -> dir ^ x) (parse_liqpack sexp config true).files in
+                acc @ combined) [] deps
+          else
+            []
+        in
+        { result with files = deps_files @ result.files; deps }
 
       | Sexp.List sexp_lst ->
         List.fold_left (fun acc x -> loop x acc) result sexp_lst
@@ -71,6 +81,7 @@ module LiqpackConfig = struct
         result
     in
     loop liqpack_raw {
+      name = "";
       files = [];
       main = None;
       deps = [];
@@ -141,9 +152,14 @@ module BaseConfig = struct
       let _ = Hashtbl.remove config.libs name in
       gen_config config |> write_config
 
-  let install_from_git name url =
-    let lib_dir = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ name in
-    Sys.command ("git clone %s %s" #< url lib_dir)
+  let install_from_git url =
+    let temp_dir = Unix.getenv "HOME" ^ "/.liqpack/libs/_" in
+    let _ = Sys.command ("rm -rf %s" #< temp_dir) in
+    temp_dir, Sys.command ("git clone %s %s" #< url temp_dir) = 0
+
+  let move_for_git name =
+    let dir x = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ x in
+    Sys.command ("mv %s %s" #< (dir "_") (dir name))
 
 end
 

@@ -25,6 +25,6 @@ let start_with s p =
   p = String.sub s 0 (String.length p)
 
 let is_git_url path =
-  start_with path "git@" && 
-  start_with path "http://" && 
+  start_with path "git@" || 
+  start_with path "http://" || 
   start_with path "https://" 

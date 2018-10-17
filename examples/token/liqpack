@@ -1,4 +1,7 @@
 (
+  (name use_of_token)
   (files use_of_token.liq)
-  (deps token)
+  (deps 
+    (token https://github.com/tezexchange/token-standard.git)
+  )
 )

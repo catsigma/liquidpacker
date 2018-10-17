@@ -1,10 +1,13 @@
 open Config
 open Util
 
-let compile dir_path ?(arg = "") config  =
+let get_liqpack_config dir_path config need_files =
   let path = abs_path dir_path ^ "/liqpack" in
   let liqpack_path = if Sys.file_exists path then path else raise (Error "no liqpack file found") in
-  let liqpack_config = LiqpackConfig.parse_liqpack (LiqpackConfig.read_liqpack liqpack_path) config in
+  LiqpackConfig.parse_liqpack (LiqpackConfig.read_liqpack liqpack_path) config need_files
+
+let compile dir_path ?(arg = "") config  =
+  let liqpack_config = get_liqpack_config dir_path config true in
   let files_string = List.fold_left (fun acc x -> acc ^ " " ^ x) "" liqpack_config.files in
   let _ = Sys.chdir dir_path in
   let command = 
