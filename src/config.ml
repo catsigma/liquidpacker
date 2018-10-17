@@ -22,7 +22,8 @@ module LiqpackConfig = struct
   let read_package (config : config) name =
     match Hashtbl.find_opt config.libs name with
     | Some ("local", dir) ->
-      dir, read_liqpack (dir ^ "/liqpack")
+      let dir = dir ^ "/" in
+      dir, read_liqpack (dir ^ "liqpack")
 
     | Some ("git", _) ->
       let dir = Unix.getenv "HOME" ^ "/.liqpack/libs/%s/" #< name in
@@ -108,18 +109,6 @@ module BaseConfig = struct
         (fun k (m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom m; Sexp.Atom u] :: acc) 
         config.libs [])
 
-  let check_n_create dir =
-    let result = 
-      try
-        Sys.is_directory dir
-      with Sys_error _ ->
-        false
-    in
-    if not result then
-      Unix.mkdir dir 0o777
-    else
-      ()
-
   let config_path = 
     let dir = Unix.getenv "HOME" ^ "/.liqpack" in
     let libs_dir = Unix.getenv "HOME" ^ "/.liqpack/libs" in
@@ -136,6 +125,25 @@ module BaseConfig = struct
     with Sys_error _ ->
       write_config init_config;
       Sexp.load_sexp config_path
+
+  let remove_package name config = 
+    match Hashtbl.find_opt config.libs name with
+    | None ->
+      raise (Error "package %s does not exist" #< name)
+
+    | Some ("git", _) ->
+      let _ = Hashtbl.remove config.libs name in
+      let lib_dir = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ name in
+      let _ = Sys.command "rm -rf %s" #< lib_dir in
+      gen_config config |> write_config
+
+    | _ ->
+      let _ = Hashtbl.remove config.libs name in
+      gen_config config |> write_config
+
+  let install_from_git name url =
+    let lib_dir = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ name in
+    Sys.command ("git clone %s %s" #< url lib_dir)
 
 end
 
