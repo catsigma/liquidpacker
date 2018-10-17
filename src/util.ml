@@ -1,5 +1,7 @@
 exception Error of string 
 
+let (#<) = Printf.sprintf
+
 let git_clone name url =
   Sys.command ("git clone " ^ url ^ " libs/" ^ name)
 

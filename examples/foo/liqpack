@@ -1,0 +1,5 @@
+(
+  (files a.liq b.liq)
+  (main foo)
+  (deps bar)
+)

@@ -1,5 +1,0 @@
-(
-  (files a.liq b.liq)
-  (main example)
-  (deps token)
-)

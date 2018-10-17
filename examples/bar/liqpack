@@ -1,0 +1,5 @@
+(
+  (files x.liq y.liq)
+  (main bar)
+  (deps )
+)

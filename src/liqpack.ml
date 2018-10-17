@@ -3,8 +3,14 @@ open Config
 
 let (#<) = Printf.sprintf
 
-let sys_arg_parse (config : BaseConfig.t) =
+let sys_arg_parse (config : config) =
   match Sys.argv with
+  | [| _ ; "build" ; path; |] ->
+    let path = abs_path path ^ "liqpack" in
+    let liqpack_path = if Sys.file_exists path then path else raise (Error "no liqpack file found") in
+    let liqpack_config : LiqpackConfig.t = LiqpackConfig.parse_liqpack (LiqpackConfig.read_liqpack liqpack_path) config in
+    print_endline (List.fold_left (fun acc x -> acc ^ " " ^ x) "" liqpack_config.files)
+
   | [| _ ; "install" ; name; "local"; dir |] -> 
     let abs_dir = abs_path dir in
     let _ = Hashtbl.replace config.libs name ("local", abs_dir) in
@@ -20,6 +26,7 @@ let sys_arg_parse (config : BaseConfig.t) =
   | _ -> print_endline "
   Current path: %s
 
+  build <target dir path>
   setpath <liquidity path>
   install <name> <method> <location>
   remove <package name>
