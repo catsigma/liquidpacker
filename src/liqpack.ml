@@ -33,17 +33,17 @@ let sys_arg_parse (config : config) =
 
       | [| _ ; "install" ; raw_path |] ->
         let rec install path =
-          let liqpack_config, from =
+          let liqpack_config, from, reg_path =
             if is_git_url path then
               let (temp_dir, result) = BaseConfig.install_from_git path in
               if result then
-                Compile.get_liqpack_config temp_dir config false, "git"
+                Compile.get_liqpack_config temp_dir config false, "git", path
               else
                 let _ = Sys.command ("rm -rf %s" #< temp_dir) in
                 raise (Error "git clone failed")
             else
               let path = if path = raw_path then path else raw_path ^ "/" ^ path in
-              Compile.get_liqpack_config path config false, "local"
+              Compile.get_liqpack_config path config false, "local", abs_path path
           in
           if liqpack_config.name = "" then
             raise (Error "no name field in liqpack file")
@@ -51,10 +51,9 @@ let sys_arg_parse (config : config) =
             let _ = 
               if from = "git" then
                 let _ = BaseConfig.move_for_git liqpack_config.name in
-                Hashtbl.replace config.libs liqpack_config.name ("git", path)
+                Hashtbl.replace config.libs liqpack_config.name ("git", reg_path)
               else
-                let path = if path = raw_path then path else raw_path ^ "/" ^ path in
-                Hashtbl.replace config.libs liqpack_config.name ("local", abs_path path)
+                Hashtbl.replace config.libs liqpack_config.name ("local", reg_path)
             in
             List.iter (fun (_,x) -> install x) liqpack_config.deps
         in

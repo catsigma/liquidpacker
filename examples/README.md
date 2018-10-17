@@ -2,12 +2,13 @@
 
 ### foo and bar
 ```
-liqpack install bar/
+liqpack install foo/
 liqpack build foo/
 ```
+This will install both `foo` and his dependents.
 
 ### token
 ```
-liqpack install https://github.com/tezexchange/token-standard.git
+liqpack install token/
 liqpack build token/
 ```
