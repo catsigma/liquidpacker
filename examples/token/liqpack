@@ -1,0 +1,4 @@
+(
+  (files use_of_token.liq)
+  (deps token)
+)

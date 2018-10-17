@@ -29,7 +29,7 @@ module LiqpackConfig = struct
       dir, read_liqpack (dir ^ "liqpack")
 
     | _ ->
-      raise (Error (name ^ " is not found"))
+      raise (Error "package %s is not found" #< name)
 
   let rec parse_liqpack liqpack_raw (config : config) =
     let rec loop sexp result =
@@ -75,6 +75,7 @@ module LiqpackConfig = struct
       deps = [];
     }
 end
+
 
 module BaseConfig = struct
   let construct_config path libs = 
@@ -135,7 +136,6 @@ module BaseConfig = struct
     with Sys_error _ ->
       write_config init_config;
       Sexp.load_sexp config_path
-
 
 end
 
