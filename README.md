@@ -1,9 +1,15 @@
 # liqpack
 Package manager for liquidity of Tezos
 
+### Requirements
+```
+Liquidity >= 4.01
+```
+
 ### Liqpack Installation
 ```
 opam pin liqpack https://github.com/catsigma/liqpack.git
+liqpack setpath <your liquidity executable file path>
 ```
 
 ### Install package from local
