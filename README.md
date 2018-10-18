@@ -3,7 +3,7 @@ Package manager for liquidity of Tezos
 
 ### Liqpack Installation
 ```
-opam install liqpack
+opam pin liqpack https://github.com/catsigma/liqpack.git
 ```
 
 ### Install package from local
