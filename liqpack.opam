@@ -5,5 +5,8 @@ synopsis: "Package manager for liquidity of Tezos"
 maintainer: "catsigma <im@catsigma.com>"
 authors: "catsigma <im@catsigma.com>"
 license: "MIT"
+homepage: "https://github.com/catsigma/liqpack"
+bug-reports: "https://github.com/catsigma/liqpack/issues"
+dev-repo: "git+https://github.com/catsigma/liqpack.git"
 depends: [ "ocaml" "ocamlfind" "dune" ]
 build: ["dune" "build" "--profile" "release" "src/liqpack.exe"]

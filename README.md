@@ -1,7 +1,7 @@
 # liqpack
 Package manager for liquidity of Tezos
 
-## Installation
+### Liqpack Installation
 ```
 opam install liqpack
 ```
@@ -17,8 +17,31 @@ This will also install all the dependencies defined in the `liqpack` file in the
 liqpack install https://github.com/tezexchange/token-standard.git
 ```
 
-## Build package
+### Build package
 ```
 liqpack build examples/foo
 liqpack build examples/use_of_token
+```
+
+### Liqpack file
+```
+(
+  (name <the package name>)
+  (files <.liq file sequence>)
+  (main <?module sequence>)
+  (deps 
+    (<name> <directory location / git address>))
+)
+```
+
+Example:
+```
+(
+  (name foo)
+  (files a.liq b.liq)
+  (main W X Y Q)
+  (deps 
+    (bar ./../bar)
+    (token https://github.com/tezexchange/token-standard.git))
+)
 ```

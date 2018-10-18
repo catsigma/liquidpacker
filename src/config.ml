@@ -10,7 +10,7 @@ module LiqpackConfig = struct
   type t = {
     name: string;
     files: string list;
-    main: string option;
+    main: string list;
     deps: (string * string) list;
   }
 
@@ -42,8 +42,14 @@ module LiqpackConfig = struct
       | Sexp.List (Sexp.Atom "main" :: []) ->
         result
 
-      | Sexp.List (Sexp.Atom "main" :: Sexp.Atom main :: []) ->
-        { result with main = Some main }
+      | Sexp.List (Sexp.Atom "main" :: main_lst) ->
+        let main_strings = List.map (fun x -> 
+            match x with 
+            | Sexp.List _ -> raise (Error "invalid `main` value in liqpack file")
+            | Sexp.Atom x -> x
+          ) main_lst
+        in
+        { result with main = main_strings }
 
       | Sexp.List (Sexp.Atom "files" :: paths) ->
         let path_strings = List.map (fun x -> 
@@ -83,7 +89,7 @@ module LiqpackConfig = struct
     loop liqpack_raw {
       name = "";
       files = [];
-      main = None;
+      main = [];
       deps = [];
     }
 end
@@ -159,6 +165,7 @@ module BaseConfig = struct
 
   let move_for_git name =
     let dir x = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ x in
+    let _ = Sys.command ("rm -rf %s" #< (dir name)) in
     Sys.command ("mv %s %s" #< (dir "_") (dir name))
 
 end

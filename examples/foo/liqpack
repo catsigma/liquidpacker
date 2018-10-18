@@ -1,7 +1,7 @@
 (
   (name foo)
   (files a.liq b.liq)
-  (main W)
+  (main W X Y Q)
   (deps 
     (bar ./../bar))
 )

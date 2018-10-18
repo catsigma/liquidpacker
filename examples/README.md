@@ -5,7 +5,7 @@
 liqpack install foo/
 liqpack build foo/
 ```
-This will install both `foo` and his dependents.
+This will install both `foo` and it's dependencies.
 
 ### token
 ```
