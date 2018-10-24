@@ -65,7 +65,7 @@ let sys_arg_parse (config : config) =
 
   setpath <liquidity path>
   build <target dir path> <?liquidity arguments>      
-  install <name> <dir path/git url>
+  install <dir path/git url>
   remove <package name>
   list
       " #< config.path
