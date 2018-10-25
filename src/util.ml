@@ -22,8 +22,13 @@ let check_n_create dir =
     ()
 
 let start_with s p =
-  p = String.sub s 0 (String.length p)
-
+  let len_s = String.length s in
+  let len_p = String.length p in
+  if len_s >= len_p then
+    p = String.sub s 0 len_p
+  else
+    false
+    
 let is_git_url path =
   start_with path "git@" || 
   start_with path "http://" || 
