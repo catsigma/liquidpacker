@@ -12,7 +12,7 @@ let sys_arg_parse (config : config) =
       | [| _ ; "list" |] ->
         let path = config.path in
         let libs = Hashtbl.fold 
-          (fun k (m, _) acc -> "%s\n    %s (%s)" #< acc k m) 
+          (fun k (v, m, _) acc -> "%s\n    %s: v%s (%s)" #< acc k v m) 
           config.libs ""
         in
         print_endline ("
@@ -48,19 +48,21 @@ let sys_arg_parse (config : config) =
           if liqpack_config.name = "" then
             raise (Error "no name field in liqpack file")
           else
+            let version = Version.stringify liqpack_config.version in
             let _ = 
               if from = "git" then
                 let _ = BaseConfig.move_for_git liqpack_config.name in
-                Hashtbl.replace config.libs liqpack_config.name ("git", reg_path)
+                Hashtbl.replace config.libs liqpack_config.name (version, "git", reg_path)
               else
-                Hashtbl.replace config.libs liqpack_config.name ("local", reg_path)
+                Hashtbl.replace config.libs liqpack_config.name (version, "local", reg_path)
             in
             List.iter (fun (_,x) -> install x) liqpack_config.deps
         in
         install raw_path;
         BaseConfig.gen_config config |> BaseConfig.write_config
 
-      | _ -> print_endline "
+      | _ -> print_endline ("
+  Version: %s
   Liquidity path: %s
 
   setpath <liquidity path>
@@ -68,7 +70,7 @@ let sys_arg_parse (config : config) =
   install <dir path/git url>
   remove <package name>
   list
-      " #< config.path
+      " #< "0.1.3" config.path)
 
 let () =
   let config_raw = BaseConfig.read_config () in

@@ -3,12 +3,13 @@ open Util
 
 type config = {
   path: string;
-  libs: (string, string * string) Hashtbl.t;  
+  libs: (string, string * string * string) Hashtbl.t;  
 }
 
 module LiqpackConfig = struct
   type t = {
     name: string;
+    version: Version.t;
     files: string list;
     main: string list;
     deps: (string * string) list;
@@ -22,11 +23,11 @@ module LiqpackConfig = struct
 
   let read_package (config : config) name =
     match Hashtbl.find_opt config.libs name with
-    | Some ("local", dir) ->
+    | Some (_, "local", dir) ->
       let dir = dir ^ "/" in
       dir, read_liqpack (dir ^ "liqpack")
 
-    | Some ("git", _) ->
+    | Some (_, "git", _) ->
       let dir = Unix.getenv "HOME" ^ "/.liqpack/libs/%s/" #< name in
       dir, read_liqpack (dir ^ "liqpack")
 
@@ -44,12 +45,15 @@ module LiqpackConfig = struct
 
       | Sexp.List (Sexp.Atom "main" :: main_lst) ->
         let main_strings = List.map (fun x -> 
-            match x with 
+            match x with
             | Sexp.List _ -> raise (Error "invalid `main` value in liqpack file")
             | Sexp.Atom x -> x
           ) main_lst
         in
         { result with main = main_strings }
+
+      | Sexp.List (Sexp.Atom "version" :: Sexp.Atom ver_string :: []) ->
+        { result with version = Version.parse ver_string }
 
       | Sexp.List (Sexp.Atom "files" :: paths) ->
         let path_strings = List.map (fun x -> 
@@ -88,6 +92,7 @@ module LiqpackConfig = struct
     in
     loop liqpack_raw {
       name = "";
+      version = [];
       files = [];
       main = [];
       deps = [];
@@ -110,8 +115,11 @@ module BaseConfig = struct
       match sexp with
       | Sexp.List (Sexp.Atom "path" :: Sexp.Atom value :: []) ->
         { result with path = value }
+      | Sexp.List (Sexp.Atom name :: Sexp.Atom version :: Sexp.Atom meth :: Sexp.Atom location :: []) ->
+        Hashtbl.add result.libs name (version, meth, location);
+        result
       | Sexp.List (Sexp.Atom name :: Sexp.Atom meth :: Sexp.Atom location :: []) ->
-        Hashtbl.add result.libs name (meth, location);
+        Hashtbl.add result.libs name ("0", meth, location);
         result
       | Sexp.List sexp_lst ->
         List.fold_left (fun acc x -> loop x acc) result sexp_lst
@@ -123,7 +131,7 @@ module BaseConfig = struct
   let gen_config config =
     construct_config config.path 
       (Hashtbl.fold 
-        (fun k (m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom m; Sexp.Atom u] :: acc) 
+        (fun k (v, m, u) acc -> Sexp.List [Sexp.Atom k; Sexp.Atom v; Sexp.Atom m; Sexp.Atom u] :: acc) 
         config.libs [])
 
   let config_path = 
@@ -148,7 +156,7 @@ module BaseConfig = struct
     | None ->
       raise (Error "package %s does not exist" #< name)
 
-    | Some ("git", _) ->
+    | Some (_, "git", _) ->
       let _ = Hashtbl.remove config.libs name in
       let lib_dir = Unix.getenv "HOME" ^ "/.liqpack/libs/" ^ name in
       let _ = Sys.command "rm -rf %s" #< lib_dir in

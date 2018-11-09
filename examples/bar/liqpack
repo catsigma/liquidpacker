@@ -1,5 +1,6 @@
 (
   (name bar)
+  (version 0.1.0)
   (files x.liq y.liq)
   (main Q)
   (deps )

@@ -33,3 +33,42 @@ let is_git_url path =
   start_with path "git@" || 
   start_with path "http://" || 
   start_with path "https://" 
+
+
+module Version = struct
+  type t = int list
+
+  let parse (s : string) =
+    let lst = String.split_on_char '.' s in
+    List.map int_of_string lst
+
+  let stringify (v : t) =
+    List.fold_left (fun acc v -> 
+      if acc = "" then 
+        "%d" #< v
+      else
+        "%s.%d" #< acc v
+    ) "" v
+
+  let compare (v1 : t) (v2 : t) =
+    let rec cp lst1 lst2 =
+      match (lst1, lst2) with
+      | ([], []) ->
+        0
+      | (_ :: _, []) ->
+        1
+      | ([], _ :: _) ->
+        -1
+      | (num1 :: tl1, num2 :: tl2) ->
+        if num1 = num2 then
+          cp tl1 tl2
+        else
+          if num1 > num2 then
+            1
+          else
+            -1
+
+    in
+    cp v1 v2
+
+end
