@@ -12,7 +12,7 @@ module LiqpackConfig = struct
     version: Version.t;
     files: string list;
     main: string list;
-    deps: (string * string) list;
+    deps: (string * string * Version.t) list;
   }
 
   let read_liqpack path =
@@ -53,7 +53,7 @@ module LiqpackConfig = struct
         { result with main = main_strings }
 
       | Sexp.List (Sexp.Atom "version" :: Sexp.Atom ver_string :: []) ->
-        { result with version = Version.parse ver_string }
+        { result with version = Version.parse ver_string "" }
 
       | Sexp.List (Sexp.Atom "files" :: paths) ->
         let path_strings = List.map (fun x -> 
@@ -65,20 +65,28 @@ module LiqpackConfig = struct
         { result with files = result.files @ path_strings }
 
       | Sexp.List (Sexp.Atom "deps" :: deps) ->
-        let deps = List.map (fun x -> 
+        let deps : (string * string * Version.t) list = List.map (fun x -> 
             match x with 
             | Sexp.List (Sexp.Atom name :: Sexp.Atom info :: []) ->
-              name, info
+              name, info, ({ num = []; predicate = None; } : Version.t)
+            | Sexp.List (Sexp.Atom name :: Sexp.Atom info :: Sexp.List (Sexp.Atom predicate :: Sexp.Atom version :: []) :: []) ->
+              name, info, Version.parse version predicate
             | _ -> raise (Error "invalid `deps` value in liqpack file")
           ) deps
         in
-        let deps_files = 
+        let deps_files : string list = 
           if need_files then
             List.fold_left 
-              (fun acc (x, _) -> 
+              (fun acc (x, _, requirement) -> 
                 let dir, sexp = read_package config x in
-                let combined = List.map (fun x -> dir ^ x) (parse_liqpack sexp config true).files in
-                acc @ combined) [] deps
+                let liqpack_config = parse_liqpack sexp config true in
+                if not (Version.check liqpack_config.version requirement) then
+                  let v_info = Version.stringify liqpack_config.version in
+                  let r_info = Version.stringify requirement in
+                  raise (Error ("package %s: %s doesn't meet the requirement %s" #< liqpack_config.name v_info r_info))
+                else
+                  let combined = List.map (fun x -> dir ^ x) liqpack_config.files in
+                  acc @ combined) [] deps
           else
             []
         in
@@ -92,7 +100,7 @@ module LiqpackConfig = struct
     in
     loop liqpack_raw {
       name = "";
-      version = [];
+      version = { num = []; predicate = None };
       files = [];
       main = [];
       deps = [];

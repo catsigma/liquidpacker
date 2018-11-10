@@ -12,7 +12,7 @@ let sys_arg_parse (config : config) =
       | [| _ ; "list" |] ->
         let path = config.path in
         let libs = Hashtbl.fold 
-          (fun k (v, m, _) acc -> "%s\n    %s: v%s (%s)" #< acc k v m) 
+          (fun k (v, m, _) acc -> "%s\n    %s: %s (%s)" #< acc k v m) 
           config.libs ""
         in
         print_endline ("
@@ -56,7 +56,7 @@ let sys_arg_parse (config : config) =
               else
                 Hashtbl.replace config.libs liqpack_config.name (version, "local", reg_path)
             in
-            List.iter (fun (_,x) -> install x) liqpack_config.deps
+            List.iter (fun (_, x, _) -> install x) liqpack_config.deps
         in
         install raw_path;
         BaseConfig.gen_config config |> BaseConfig.write_config

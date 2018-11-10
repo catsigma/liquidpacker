@@ -36,39 +36,66 @@ let is_git_url path =
 
 
 module Version = struct
-  type t = int list
+  type predicate = LE | GE | EQ
+  type t = {
+    num: int list;
+    predicate: predicate option;
+  }
 
-  let parse (s : string) =
+  let parse (s : string) (p : string) =
     let lst = String.split_on_char '.' s in
-    List.map int_of_string lst
+    let predicate = 
+      match p with
+      | "" -> None
+      | ">=" -> Some GE
+      | "<=" -> Some LE
+      | "=" -> Some EQ
+      | _ -> raise (Error "version predicate can only be `>=`, `<=` or `=`")
+    in
+    { num = List.map int_of_string lst;
+      predicate; }
 
   let stringify (v : t) =
-    List.fold_left (fun acc v -> 
+    let predicate = 
+      match v.predicate with
+      | None -> ""
+      | Some p ->
+        match p with | LE -> "<= " | GE -> ">= " | EQ -> "= "
+    in
+    predicate ^ List.fold_left (fun acc v -> 
       if acc = "" then 
         "%d" #< v
       else
         "%s.%d" #< acc v
-    ) "" v
+    ) "" v.num
 
   let compare (v1 : t) (v2 : t) =
     let rec cp lst1 lst2 =
       match (lst1, lst2) with
       | ([], []) ->
-        0
+        EQ
       | (_ :: _, []) ->
-        1
+        GE
       | ([], _ :: _) ->
-        -1
+        LE
       | (num1 :: tl1, num2 :: tl2) ->
         if num1 = num2 then
           cp tl1 tl2
         else
           if num1 > num2 then
-            1
+            GE
           else
-            -1
-
+            LE
     in
-    cp v1 v2
+    cp v1.num v2.num
+
+  let check (v : t) (r : t) =
+    let compare_result = compare v r in
+    match r.predicate, compare_result with
+    | Some _, EQ -> true
+    | None, _ -> true
+    | Some GE, GE -> true
+    | Some LE, LE -> true
+    | _ -> false
 
 end

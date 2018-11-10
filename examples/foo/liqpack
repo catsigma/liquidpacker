@@ -4,5 +4,5 @@
   (files a.liq b.liq)
   (main W X Y Q)
   (deps 
-    (bar ./../bar))
+    (bar ./../bar (>= 0.1.0)))
 )

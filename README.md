@@ -33,10 +33,11 @@ liqpack build examples/use_of_token
 ```
 (
   (name <the package name>)
+  (version 0.1.0)
   (files <.liq file sequence>)
   (main <?module sequence>)
   (deps 
-    (<name> <directory location / git address>))
+    (<name> <directory location / git address> <version requirement>))
 )
 ```
 
@@ -47,7 +48,7 @@ Example:
   (files a.liq b.liq)
   (main W X Y Q)
   (deps 
-    (bar ./../bar)
-    (token https://github.com/tezexchange/token-standard.git))
+    (bar ./../bar (>= 0.1))
+    (token https://github.com/tezexchange/token-standard.git (<= 0.3)))
 )
 ```
