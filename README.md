@@ -45,6 +45,7 @@ Example:
 ```
 (
   (name foo)
+  (version 0.1.0)
   (files a.liq b.liq)
   (main W X Y Q)
   (deps 
