@@ -11,8 +11,9 @@ let compile dir_path ?(arg = "") config  =
   let files_string = List.fold_left (fun acc x -> acc ^ " " ^ x) "" liqpack_config.files in
   let _ = Sys.chdir dir_path in
   let run_command main_opt = 
+    let _ = print_newline () in
     let command = 
-      "\n%s %s %s %s" #< 
+      "%s %s %s %s" #< 
         config.path 
         files_string 
         (match main_opt with | None -> "" | Some x -> "--main %s" #< x)
@@ -41,7 +42,6 @@ let compile dir_path ?(arg = "") config  =
       loop tl is_initially_empty
     | [] when is_initially_empty ->
       run_command None
-    | [] ->
-      ()
+    | [] -> ()
   in
   loop liqpack_config.main (List.length liqpack_config.main = 0)
