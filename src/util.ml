@@ -34,6 +34,17 @@ let is_git_url path =
   start_with path "http://" || 
   start_with path "https://" 
 
+let move_file file dist =
+  let file_path = abs_path file in
+  if Sys.file_exists file_path then
+    let dir_path = abs_path dist in
+    let _ = check_n_create dir_path in
+    if Sys.command ("mv %s %s" #< file_path dir_path) = 0 then
+      ()
+    else
+      raise (Error "Move file failed!")
+  else
+    ()
 
 module Version = struct
   type predicate = LE | GE | EQ

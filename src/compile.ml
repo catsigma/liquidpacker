@@ -16,10 +16,21 @@ let compile dir_path ?(arg = "") config  =
         config.path 
         files_string 
         (match main_opt with | None -> "" | Some x -> "--main %s" #< x)
-        arg
+        (match liqpack_config.options with | Some x -> x | None -> "") ^ " " ^ arg
     in
     if Sys.command command = 0 then
-      ()
+      match (liqpack_config.output, main_opt) with
+      | Some output_dir, Some main_name ->
+        let main_file_name = 
+          (String.mapi (fun i c -> if i = 0 then Char.lowercase_ascii c else c) main_name)
+        in
+        List.iter (fun surfix -> 
+          let file_name = main_file_name ^ surfix in
+          move_file file_name output_dir
+        ) [".liq.tz"; ".liq.tz.json"; ".liq.init.tz"; ".liq.init.json"]
+        
+      | _ -> ()
+
     else
       raise (Error "Compilation failed!")
   in

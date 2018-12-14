@@ -13,6 +13,8 @@ module LiqpackConfig = struct
     files: string list;
     main: string list;
     deps: (string * string * Version.t) list;
+    options: string option;
+    output: string option;
   }
 
   let read_liqpack path =
@@ -54,6 +56,12 @@ module LiqpackConfig = struct
 
       | Sexp.List (Sexp.Atom "version" :: Sexp.Atom ver_string :: []) ->
         { result with version = Version.parse ver_string "" }
+
+      | Sexp.List (Sexp.Atom "options" :: Sexp.Atom option_string :: []) ->
+        { result with options = Some option_string }
+
+      | Sexp.List (Sexp.Atom "output" :: Sexp.Atom output_string :: []) ->
+        { result with output = Some output_string }
 
       | Sexp.List (Sexp.Atom "files" :: paths) ->
         let path_strings = List.map (fun x -> 
@@ -104,6 +112,8 @@ module LiqpackConfig = struct
       files = [];
       main = [];
       deps = [];
+      options = None;
+      output = None;
     }
 end
 
