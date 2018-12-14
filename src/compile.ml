@@ -12,7 +12,7 @@ let compile dir_path ?(arg = "") config  =
   let _ = Sys.chdir dir_path in
   let run_command main_opt = 
     let command = 
-      "%s %s %s %s" #< 
+      "\n%s %s %s %s" #< 
         config.path 
         files_string 
         (match main_opt with | None -> "" | Some x -> "--main %s" #< x)
@@ -28,7 +28,7 @@ let compile dir_path ?(arg = "") config  =
           let file_name = main_file_name ^ surfix in
           move_file file_name output_dir
         ) [".liq.tz"; ".liq.tz.json"; ".liq.init.tz"; ".liq.init.json"]
-        
+
       | _ -> ()
 
     else
