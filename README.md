@@ -36,6 +36,8 @@ liquidpacker build examples/use_of_token
   (version 0.1.0)
   (files <.liq file sequence>)
   (main <?module sequence>)
+  (options <additional liquidity parameters>)
+  (output <output dir name>)
   (deps 
     (<name> <directory location / git address> <version requirement>))
 )
@@ -48,6 +50,8 @@ Example:
   (version 0.1.0)
   (files a.liq b.liq)
   (main W X Y Q)
+  (options "--json --no-annot")
+  (output build)
   (deps 
     (bar ./../bar (>= 0.1))
     (token https://github.com/tezexchange/token-standard.git (<= 0.3)))
