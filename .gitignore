@@ -1,6 +1,5 @@
 /_build
 .merlin
-liqpack.cfg
 /libs
 *.tz
 *.json

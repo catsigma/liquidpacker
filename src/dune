@@ -1,4 +1,4 @@
 (executable
-  (name liqpack)
+  (name liquidpacker)
   (libraries str sexplib))
 

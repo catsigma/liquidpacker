@@ -1,12 +1,12 @@
 opam-version: "2.0"
-name: "liqpack"
+name: "liquidpacker"
 version: "0.1.5"
 synopsis: "Package manager for liquidity of Tezos"
 maintainer: "catsigma <im@catsigma.com>"
 authors: "catsigma <im@catsigma.com>"
 license: "MIT"
-homepage: "https://github.com/catsigma/liqpack"
-bug-reports: "https://github.com/catsigma/liqpack/issues"
-dev-repo: "git+https://github.com/catsigma/liqpack.git"
+homepage: "https://github.com/catsigma/liquidpacker"
+bug-reports: "https://github.com/catsigma/liquidpacker/issues"
+dev-repo: "git+https://github.com/catsigma/liquidpacker.git"
 depends: [ "ocaml" "ocamlfind" "dune" ]
-build: ["dune" "build" "--profile" "release" "src/liqpack.exe"]
+build: ["dune" "build" "--profile" "release" "src/liquidpacker.exe"]

@@ -1,4 +1,4 @@
-# liqpack
+# liquidpacker
 Package manager for liquidity of Tezos
 
 ### Requirements
@@ -6,30 +6,30 @@ Package manager for liquidity of Tezos
 Liquidity >= 4.01
 ```
 
-### Liqpack Installation
+### Liquidpacker Installation
 ```
-opam pin liqpack https://github.com/catsigma/liqpack.git
-liqpack setpath <your liquidity executable file path>
+opam pin liquidpacker https://github.com/catsigma/liquidpacker.git
+liquidpacker setpath <your liquidity executable file path>
 ```
 
 ### Install package from local
 ```
-liqpack install examples/foo
+liquidpacker install examples/foo
 ```
-This will also install all the dependencies defined in the `liqpack` file in the package's root folder.
+This will also install all the dependencies defined in the `liquidpacker` file in the package's root folder.
 
 ### Install package from git
 ```
-liqpack install https://github.com/tezexchange/token-standard.git
+liquidpacker install https://github.com/tezexchange/token-standard.git
 ```
 
 ### Build package
 ```
-liqpack build examples/foo
-liqpack build examples/use_of_token
+liquidpacker build examples/foo
+liquidpacker build examples/use_of_token
 ```
 
-### Liqpack file
+### Liquidpacker file
 ```
 (
   (name <the package name>)
