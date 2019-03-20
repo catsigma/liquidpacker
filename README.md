@@ -8,7 +8,7 @@ Liquidity >= 4.01
 
 ### Liquidpacker Installation
 ```
-opam pin liquidpacker https://github.com/catsigma/liquidpacker.git
+opam pin https://github.com/catsigma/liquidpacker.git
 liquidpacker setpath <your liquidity executable file path>
 ```
 
