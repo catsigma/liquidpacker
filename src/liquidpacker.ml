@@ -70,7 +70,7 @@ let sys_arg_parse (config : config) =
   install <dir path/git url>
   remove <package name>
   list
-      " #< "0.1.6" config.path)
+      " #< "0.1.7" config.path)
 
 let () =
   let config_raw = BaseConfig.read_config () in
