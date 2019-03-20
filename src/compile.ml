@@ -28,7 +28,7 @@ let compile dir_path ?(arg = "") config  =
         List.iter (fun surfix -> 
           let file_name = main_file_name ^ surfix in
           move_file file_name output_dir
-        ) [".liq.tz"; ".liq.tz.json"; ".liq.init.tz"; ".liq.init.json"]
+        ) [".tz"; ".init.tz"; ".tz.json"; ".init.json"]
 
       | _ -> ()
 
