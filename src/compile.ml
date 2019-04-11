@@ -8,9 +8,10 @@ let get_liquidpacker_config dir_path config need_files =
 
 let compile dir_path ?(arg = "") config  =
   let liquidpacker_config = get_liquidpacker_config dir_path config true in
-  let files_string = List.fold_left (fun acc x -> acc ^ " " ^ x) "" liquidpacker_config.files in
   let _ = Sys.chdir dir_path in
-  let run_command main_opt = 
+
+  let run_command main_opt file_lst =
+    let files_string = List.fold_left (fun acc x -> acc ^ " " ^ x) "" file_lst in
     let _ = print_newline () in
     let command = 
       "%s %s %s %s" #< 
@@ -20,8 +21,14 @@ let compile dir_path ?(arg = "") config  =
         (match liquidpacker_config.options with | Some x -> x | None -> "") ^ " " ^ arg
     in
     if Sys.command command = 0 then
-      match (liquidpacker_config.output, main_opt) with
-      | Some output_dir, Some main_name ->
+      let main_name = match main_opt with
+        | Some x -> x
+        | None -> 
+          let name = Util.last_elem file_lst in
+          String.sub name 0 ((String.length name) - 4)
+      in
+      match liquidpacker_config.output with
+      | Some output_dir ->
         let main_file_name = 
           (String.mapi (fun i c -> if i = 0 then Char.lowercase_ascii c else c) main_name)
         in
@@ -35,13 +42,19 @@ let compile dir_path ?(arg = "") config  =
     else
       raise (Error "Compilation failed!")
   in
-  let rec loop main_lst is_initially_empty =
-    match main_lst with
-    | hd :: tl ->
-      let _ = run_command (Some hd) in
-      loop tl is_initially_empty
-    | [] when is_initially_empty ->
-      run_command None
-    | [] -> ()
-  in
-  loop liquidpacker_config.main (List.length liquidpacker_config.main = 0)
+
+  if List.length liquidpacker_config.compiles = 0 then
+      let rec loop main_lst is_initially_empty =
+      match main_lst with
+      | hd :: tl ->
+        let _ = run_command (Some hd) liquidpacker_config.files in
+        loop tl is_initially_empty
+      | [] when is_initially_empty ->
+        run_command None liquidpacker_config.files
+      | [] -> ()
+    in
+    loop liquidpacker_config.main (List.length liquidpacker_config.main = 0)
+  else
+    List.iter (fun paths -> 
+      run_command None paths
+    ) liquidpacker_config.compiles

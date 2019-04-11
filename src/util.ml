@@ -2,6 +2,11 @@ exception Error of string
 
 let (#<) = Printf.sprintf
 
+let last_elem lst =
+  match List.rev lst with
+  | hd :: _ -> hd
+  | [] -> raise (Error "no element in lst")
+
 let abs_path path = 
   let cwd = Sys.getcwd () in
   if Filename.is_relative path then

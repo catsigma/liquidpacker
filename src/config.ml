@@ -12,6 +12,7 @@ module LiquidpackerConfig = struct
     version: Version.t;
     files: string list;
     main: string list;
+    compiles: string list list;
     deps: (string * string * Version.t) list;
     options: string option;
     output: string option;
@@ -63,6 +64,20 @@ module LiquidpackerConfig = struct
       | Sexp.List (Sexp.Atom "output" :: Sexp.Atom output_string :: []) ->
         { result with output = Some output_string }
 
+      | Sexp.List (Sexp.Atom "compiles" :: paths_lst) ->
+        let paths_strings = List.map (fun x -> 
+            match x with 
+            | Sexp.List paths ->
+              List.map (fun x -> 
+                match x with 
+                | Sexp.Atom x -> x 
+                | Sexp.List _ -> raise (Error "invalid inner element in `compiles` field")
+              ) paths 
+            | Sexp.Atom _ -> raise (Error "invalid `compiles` value in liquidpacker file")
+          ) paths_lst
+        in
+        { result with compiles = result.compiles @ paths_strings }
+
       | Sexp.List (Sexp.Atom "files" :: paths) ->
         let path_strings = List.map (fun x -> 
             match x with 
@@ -98,7 +113,8 @@ module LiquidpackerConfig = struct
           else
             []
         in
-        { result with files = deps_files @ result.files; deps }
+        let new_compiles = List.map (fun x -> deps_files @ x) result.compiles in
+        { result with files = deps_files @ result.files; deps; compiles = new_compiles }
 
       | Sexp.List sexp_lst ->
         List.fold_left (fun acc x -> loop x acc) result sexp_lst
@@ -111,6 +127,7 @@ module LiquidpackerConfig = struct
       version = { num = []; predicate = None };
       files = [];
       main = [];
+      compiles = [];
       deps = [];
       options = None;
       output = None;
